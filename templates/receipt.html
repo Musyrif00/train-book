@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Booking Receipt{% endblock %}
+{% block content %}
+    {% if current_user.is_authenticated %}
+        {% if booking %}
+            <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 text-center">Booking Receipt</h2>
+                <div class="space-y-2">
+                    <p><strong>Username:</strong> {{ current_user.username }}</p>
+                    <p><strong>Seat:</strong> {{ booking.seatId }}</p>
+                    <p><strong>Train Number:</strong> {{ booking.trainNumber }}</p>
+                    <p><strong>Departure:</strong> {{ booking.departure }}</p>
+                    <p><strong>Arrival:</strong> {{ booking.arrival }}</p>
+                    <p><strong>Amount:</strong> ${{ booking.amount }}</p>
+                    <p><strong>Booked At:</strong> {{ booking.bookedAt.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                </div>
+                <div class="mt-6 text-center">
+                    <a href="{{ url_for('index') }}" class="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Back to Booking</a>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center">
+                <h2 class="text-2xl font-bold mb-4">Booking Not Found</h2>
+                <p class="mb-4">The requested booking does not exist or you do not have access.</p>
+                <a href="{{ url_for('index') }}" class="text-blue-500 hover:underline">Back to Booking</a>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="text-center">
+            <h2 class="text-2xl font-bold mb-4">Please Log In</h2>
+            <p class="mb-4">You must be logged in to view receipts.</p>
+            <a href="{{ url_for('login') }}" class="text-blue-500 hover:underline">Log In</a>
+        </div>
+    {% endif %}
+{% endblock %}
