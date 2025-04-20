@@ -14,7 +14,7 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 socketio = SocketIO(app, async_mode='gevent')
 
-# for flask
+# for flasklogin
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -36,7 +36,7 @@ class User(UserMixin):
 @login_manager.user_loader
 def load_user(user_id):
     try:
-        user = users_collection.find_one({'_id': ObjectId(user_id)})
+        user = users_collection.find_one({'_id': ObjectId(user_id)}) #query
         if user:
             return User(str(user['_id']), user['username'], user['email'])
         print(f"User {user_id} not found")
@@ -47,36 +47,36 @@ def load_user(user_id):
 
 
 # init seats (6 coaches, 20 seats each)
-SEATS = {}
-for coach in range(1, 7):
-    for seat in range(1, 21):
+SEATS = {} #dictionary
+for coach in range(1, 7): #6 coach
+    for seat in range(1, 21): #20 seat
         seat_id = f'C{coach}-S{seat}'
         SEATS[seat_id] = {'status': 'available', 'user': None}
 
 
-@app.route('/')
+@app.route('/') #if open withou
 @login_required
 def index():
-    print(f"Index accessed by user: {current_user.username}")
-    return render_template('index.html')
+    print(f"Index accessed by user: {current_user.username}") #log message
+    return render_template('index.html') #if login, go to here
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        print(f"User {current_user.username} already authenticated, redirecting to index")
-        return redirect(url_for('index'))
-    if request.method == 'POST':
+    if current_user.is_authenticated: ##check if logged in
+        print(f"User {current_user.username} already authenticated, redirecting to index") #log
+        return redirect(url_for('index')) #seat page
+    if request.method == 'POST': #object from flask
         email = request.form.get('email')
         password = request.form.get('password')
-        print(f"Login attempt for email: {email}")
+        print(f"Login attempt for email: {email}") #log
         try:
             user = users_collection.find_one({'email': email})
             if user and check_password_hash(user['password'], password):
                 user_obj = User(str(user['_id']), user['username'], user['email'])
                 login_user(user_obj)
-                session.permanent = True
-                print(f"Login successful for {user['username']}")
+                session.permanent = False #set so when browser closed, expired
+                print(f"Login successful for {user['username']}") #log
                 return redirect(url_for('index'))
             else:
                 print("Invalid credentials")
@@ -157,7 +157,7 @@ def lock_seat(data):
     lock_key = f'lock:{seat_id}'
 
     if SEATS[seat_id]['status'] == 'available':
-        locked = redis_client.set(lock_key, client_id, ex=300, nx=True)
+        locked = redis_client.set(lock_key, client_id, ex=10, nx=True) #ex300second nxIfExist
         if locked:
             SEATS[seat_id]['status'] = 'locked'
             SEATS[seat_id]['user'] = client_id
@@ -187,7 +187,7 @@ def confirm_booking(data):
     lock_key = f'lock:{seat_id}'
 
     if redis_client.get(lock_key) == client_id:
-        booking = {
+        booking = { #hard coded
             'seatId': seat_id,
             'trainNumber': 'T123',
             'departure': '10:00 AM',
