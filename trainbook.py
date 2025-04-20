@@ -14,26 +14,24 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 socketio = SocketIO(app, async_mode='gevent')
 
-# Flask-Login setup
+# for flask
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Redis and MongoDB connections
+# redis and mongodb
 redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 mongo_client = pymongo.MongoClient('mongodb://localhost:27017/')
 db = mongo_client['trainBooking']
 bookings_collection = db['bookings']
 users_collection = db['users']
 
-
-# User model for Flask-Login
+# login need
 class User(UserMixin):
     def __init__(self, user_id, username, email):
         self.id = user_id
         self.username = username
         self.email = email
-
 
 @login_manager.user_loader
 def load_user(user_id):

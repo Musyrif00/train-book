@@ -75,7 +75,7 @@ mongo
 Once the dependencies are installed, run the app:
 
 ```bash
-python app.py
+python trainbook.py
 ```
 
 The app should start on http://127.0.0.1:5000 by default.
